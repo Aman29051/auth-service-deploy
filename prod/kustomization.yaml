@@ -8,4 +8,4 @@ images:
   - name: 808338307022.dkr.ecr.us-east-1.amazonaws.com/auth-service-migration
     newTag: v0.41.1_1ac4407
   - name: 808338307022.dkr.ecr.us-east-1.amazonaws.com/auth-service
-    newTag: v0.41.1_1ac4407fdf
+    newTag: v0.41.1_1ac4407fdffdf
