@@ -1,0 +1,32 @@
+name: Notify Service
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'prod/kustomization.yaml'
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get service repo name
+        id: get_repo_name
+        run: |
+          CURRENT_REPO="${{ github.repository }}"
+          REPO_NAME=$(echo "$CURRENT_REPO" | cut -d'/' -f2)
+          SERVICE_REPO_NAME=$(echo "$REPO_NAME" | sed 's/-deploy$//')
+          echo "Service repository name: $SERVICE_REPO_NAME"
+          echo "service_repo_name=$SERVICE_REPO_NAME" >> $GITHUB_OUTPUT
+          
+      - name: Trigger repository_dispatch in service repo
+        run: |
+          SERVICE_REPO_NAME="${{ steps.get_repo_name.outputs.service_repo_name }}"
+          OWNER="${{ github.repository_owner }}"
+          TARGET_REPO="$OWNER/$SERVICE_REPO_NAME"
+          
+          echo "Triggering repository dispatch for: $TARGET_REPO"
+          
+          curl -X POST "https://api.github.com/repos/$TARGET_REPO/dispatches" \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
+          -d '{"event_type":"kustomization_changed"}'
